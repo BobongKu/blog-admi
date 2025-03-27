@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { createPost, updatePost, getPostById } from '@/lib/supabase';
 import slugify from 'slugify';
@@ -23,7 +23,10 @@ const TiptapEditor = dynamic(
   }
 );
 
-export default function EditPost() {
+// 검색 파라미터를 사용하는 컴포넌트를 별도로 분리
+import { useSearchParams } from 'next/navigation';
+
+function EditPostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const postId = searchParams.get('id');
@@ -231,5 +234,21 @@ export default function EditPost() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 메인 컴포넌트에서는 Suspense로 감싸서 렌더링
+export default function EditPost() {
+  return (
+    <Suspense fallback={
+      <div className="h-full flex justify-center items-center p-10">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+          <span className="mt-4 text-gray-600">페이지 로딩 중...</span>
+        </div>
+      </div>
+    }>
+      <EditPostContent />
+    </Suspense>
   );
 }
